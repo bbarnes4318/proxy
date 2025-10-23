@@ -112,22 +112,14 @@ def test_proxy():
         # Make request through proxy
         proxies = get_proxy_dict()
         
-        # Log proxy configuration for debugging
-        print(f"Testing proxy with config: {PROXY_CONFIG['host']}:{PROXY_CONFIG['port']}")
-        print(f"Proxy URL (masked): http://{PROXY_CONFIG['username']}:***@{PROXY_CONFIG['host']}:{PROXY_CONFIG['port']}")
-        
         response = requests.get(url, proxies=proxies, timeout=30)
         response.raise_for_status()
         
-        ip_address = response.text.strip()
-        print(f"Received IP: {ip_address}")
-        
         return jsonify({
             'success': True,
-            'ip_address': ip_address,
+            'ip_address': response.text.strip(),
             'status_code': response.status_code,
-            'message': 'Proxy connection successful!',
-            'proxy_used': f"{PROXY_CONFIG['host']}:{PROXY_CONFIG['port']}"
+            'message': 'Proxy connection successful!'
         })
     
     except requests.exceptions.ProxyError as e:
