@@ -9,7 +9,8 @@ import os
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
-app.secret_key = os.urandom(24)  # Generate a random secret key for sessions
+# Use a consistent secret key for all workers
+app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production-12345')
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
 
 # Proxy configuration from things.txt
