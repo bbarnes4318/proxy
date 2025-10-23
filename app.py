@@ -25,12 +25,15 @@ PROXY_CONFIG = {
 
 # User database (in production, use a real database)
 # Password: Each agent can have their own password
-USERS = {
-    'agent1': generate_password_hash('password123'),
-    'agent2': generate_password_hash('password123'),
-    'agent3': generate_password_hash('password123'),
-    'admin': generate_password_hash('admin123'),
-}
+# Generate 100 agent logins automatically
+USERS = {}
+
+# Create 100 agent logins (agent1 through agent100)
+for i in range(1, 101):
+    USERS[f'agent{i}'] = generate_password_hash('password123')
+
+# Add admin account
+USERS['admin'] = generate_password_hash('admin123')
 
 def login_required(f):
     """Decorator to require login for certain routes"""
@@ -44,7 +47,14 @@ def login_required(f):
 
 def get_proxy_dict():
     """Generate proxy dictionary for requests library"""
-    proxy_url = f"http://{PROXY_CONFIG['username']}:{PROXY_CONFIG['password']}@{PROXY_CONFIG['host']}:{PROXY_CONFIG['port']}"
+    # Ensure password includes country specifier
+    username = PROXY_CONFIG['username']
+    password = PROXY_CONFIG['password']
+    host = PROXY_CONFIG['host']
+    port = PROXY_CONFIG['port']
+    
+    proxy_url = f"http://{username}:{password}@{host}:{port}"
+    
     return {
         'http': proxy_url,
         'https': proxy_url
@@ -101,28 +111,50 @@ def test_proxy():
         
         # Make request through proxy
         proxies = get_proxy_dict()
-        response = requests.get(url, proxies=proxies, timeout=10)
+        
+        # Log proxy configuration for debugging
+        print(f"Testing proxy with config: {PROXY_CONFIG['host']}:{PROXY_CONFIG['port']}")
+        print(f"Proxy URL (masked): http://{PROXY_CONFIG['username']}:***@{PROXY_CONFIG['host']}:{PROXY_CONFIG['port']}")
+        
+        response = requests.get(url, proxies=proxies, timeout=30)
         response.raise_for_status()
+        
+        ip_address = response.text.strip()
+        print(f"Received IP: {ip_address}")
         
         return jsonify({
             'success': True,
-            'ip_address': response.text.strip(),
+            'ip_address': ip_address,
             'status_code': response.status_code,
-            'message': 'Proxy connection successful!'
+            'message': 'Proxy connection successful!',
+            'proxy_used': f"{PROXY_CONFIG['host']}:{PROXY_CONFIG['port']}"
         })
     
     except requests.exceptions.ProxyError as e:
+        error_msg = str(e)
+        print(f"Proxy Error: {error_msg}")
         return jsonify({
             'success': False,
             'error': 'Proxy connection failed',
-            'details': str(e)
+            'details': error_msg,
+            'proxy_config': f"{PROXY_CONFIG['host']}:{PROXY_CONFIG['port']}"
+        }), 500
+    
+    except requests.exceptions.Timeout as e:
+        print(f"Timeout Error: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': 'Connection timeout',
+            'details': 'The proxy took too long to respond. This may indicate the proxy is blocked or unavailable.'
         }), 500
     
     except requests.exceptions.RequestException as e:
+        error_msg = str(e)
+        print(f"Request Error: {error_msg}")
         return jsonify({
             'success': False,
             'error': 'Request failed',
-            'details': str(e)
+            'details': error_msg
         }), 500
 
 @app.route('/api/proxy-request', methods=['POST'])
