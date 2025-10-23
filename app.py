@@ -25,12 +25,15 @@ PROXY_CONFIG = {
 
 # User database (in production, use a real database)
 # Password: Each agent can have their own password
-USERS = {
-    'agent1': generate_password_hash('password123'),
-    'agent2': generate_password_hash('password123'),
-    'agent3': generate_password_hash('password123'),
-    'admin': generate_password_hash('admin123'),
-}
+# Generate 100 agent logins automatically
+USERS = {}
+
+# Create 100 agent logins (agent1 through agent100)
+for i in range(1, 101):
+    USERS[f'agent{i}'] = generate_password_hash('password123')
+
+# Add admin account
+USERS['admin'] = generate_password_hash('admin123')
 
 def login_required(f):
     """Decorator to require login for certain routes"""
@@ -209,10 +212,10 @@ if __name__ == '__main__':
     print("="*60)
     print(f"\nProxy Service: {PROXY_CONFIG['host']}:{PROXY_CONFIG['port']}")
     print(f"Location: {PROXY_CONFIG['country']} ({PROXY_CONFIG['rotation']})")
-    print("\nAvailable Users:")
-    for user in USERS.keys():
-        print(f"   - {user}")
-    print("\nDefault password for all users: 'password123'")
+    print(f"\nAvailable Users: {len(USERS)} total")
+    print("   - agent1 through agent100 (password: password123)")
+    print("   - admin (password: admin123)")
+    print("\nDefault password for all agents: 'password123'")
     print("   (Admin password: 'admin123')")
     print("\nAccess the portal at: http://localhost:5000")
     print("="*60 + "\n")
