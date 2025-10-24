@@ -10,7 +10,7 @@ backlog = 2048
 workers = 2  # Only 2 workers to save memory
 worker_class = 'sync'
 worker_connections = 1000
-timeout = 30
+timeout = 10
 keepalive = 2
 
 # Logging
