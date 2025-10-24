@@ -26,6 +26,10 @@ services:
     
     instance_count: 1
     instance_size_slug: basic-xxs
+    # Memory optimization
+    envs:
+      - key: GUNICORN_WORKERS
+        value: "2"
     
     health_check:
       http_path: /login

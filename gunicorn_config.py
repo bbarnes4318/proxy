@@ -6,8 +6,8 @@ import os
 bind = f"0.0.0.0:{os.environ.get('PORT', '8080')}"
 backlog = 2048
 
-# Worker processes
-workers = multiprocessing.cpu_count() * 2 + 1
+# Worker processes - REDUCED for memory constraints
+workers = 2  # Only 2 workers to save memory
 worker_class = 'sync'
 worker_connections = 1000
 timeout = 30
