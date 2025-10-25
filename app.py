@@ -72,7 +72,8 @@ def health():
     return jsonify({
         'status': 'healthy',
         'service': 'Proxy Access Portal',
-        'version': '1.0.0'
+        'version': '1.0.1',
+        'timestamp': datetime.now().isoformat()
     })
 
 @app.route('/login', methods=['GET', 'POST'])
