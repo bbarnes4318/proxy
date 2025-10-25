@@ -49,11 +49,15 @@ def login_required(f):
 
 def get_proxy_dict():
     """Generate proxy dictionary for requests library"""
-    proxy_url = f"http://{PROXY_CONFIG['username']}:{PROXY_CONFIG['password']}@{PROXY_CONFIG['host']}:{PROXY_CONFIG['port']}"
-    return {
-        'http': proxy_url,
-        'https': proxy_url
-    }
+    try:
+        proxy_url = f"http://{PROXY_CONFIG['username']}:{PROXY_CONFIG['password']}@{PROXY_CONFIG['host']}:{PROXY_CONFIG['port']}"
+        return {
+            'http': proxy_url,
+            'https': proxy_url
+        }
+    except Exception as e:
+        # Return empty dict if proxy config fails
+        return {}
 
 @app.route('/')
 def index():
@@ -61,6 +65,15 @@ def index():
     if 'username' in session:
         return redirect(url_for('dashboard'))
     return redirect(url_for('login'))
+
+@app.route('/health')
+def health():
+    """Health check endpoint for deployment"""
+    return jsonify({
+        'status': 'healthy',
+        'service': 'Proxy Access Portal',
+        'version': '1.0.0'
+    })
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -126,31 +139,47 @@ def proxy_request():
                 'error': 'URL is required'
             }), 400
         
-        # Make request through proxy
+        # Make request through proxy with error handling
         proxies = get_proxy_dict()
         
-        if method == 'GET':
-            response = requests.get(url, proxies=proxies, headers=headers, timeout=5)
-        elif method == 'POST':
-            response = requests.post(url, proxies=proxies, headers=headers, json=body, timeout=5)
-        else:
+        try:
+            if method == 'GET':
+                response = requests.get(url, proxies=proxies, headers=headers, timeout=10)
+            elif method == 'POST':
+                response = requests.post(url, proxies=proxies, headers=headers, json=body, timeout=10)
+            else:
+                return jsonify({
+                    'success': False,
+                    'error': f'Method {method} not supported'
+                }), 400
+            
+            return jsonify({
+                'success': True,
+                'status_code': response.status_code,
+                'headers': dict(response.headers),
+                'body': response.text[:1000],  # Limit response size
+                'message': 'Request completed successfully'
+            })
+        except requests.exceptions.ProxyError as e:
             return jsonify({
                 'success': False,
-                'error': f'Method {method} not supported'
-            }), 400
-        
-        return jsonify({
-            'success': True,
-            'status_code': response.status_code,
-            'headers': dict(response.headers),
-            'body': response.text[:1000],  # Limit response size
-            'message': 'Request completed successfully'
-        })
+                'error': f'Proxy connection failed: {str(e)}'
+            }), 502
+        except requests.exceptions.Timeout as e:
+            return jsonify({
+                'success': False,
+                'error': f'Request timeout: {str(e)}'
+            }), 504
+        except requests.exceptions.RequestException as e:
+            return jsonify({
+                'success': False,
+                'error': f'Request failed: {str(e)}'
+            }), 500
     
     except Exception as e:
         return jsonify({
             'success': False,
-            'error': str(e)
+            'error': f'Server error: {str(e)}'
         }), 500
 
 @app.route('/api/proxy-info')
