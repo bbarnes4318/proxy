@@ -51,6 +51,10 @@ def login_required(f):
 def get_proxy_dict():
     """Generate proxy dictionary for requests library"""
     try:
+        # Only create proxy dict when actually needed
+        if not PROXY_CONFIG.get('username') or not PROXY_CONFIG.get('password'):
+            return {}
+        
         proxy_url = f"http://{PROXY_CONFIG['username']}:{PROXY_CONFIG['password']}@{PROXY_CONFIG['host']}:{PROXY_CONFIG['port']}"
         return {
             'http': proxy_url,
@@ -128,61 +132,12 @@ def test_proxy():
 @login_required
 def proxy_request():
     """API endpoint to make custom requests through the proxy"""
-    try:
-        data = request.json
-        url = data.get('url')
-        method = data.get('method', 'GET').upper()
-        headers = data.get('headers', {})
-        body = data.get('body')
-        
-        if not url:
-            return jsonify({
-                'success': False,
-                'error': 'URL is required'
-            }), 400
-        
-        # Make request through proxy with error handling
-        proxies = get_proxy_dict()
-        
-        try:
-            if method == 'GET':
-                response = requests.get(url, proxies=proxies, headers=headers, timeout=10)
-            elif method == 'POST':
-                response = requests.post(url, proxies=proxies, headers=headers, json=body, timeout=10)
-            else:
-                return jsonify({
-                    'success': False,
-                    'error': f'Method {method} not supported'
-                }), 400
-            
-            return jsonify({
-                'success': True,
-                'status_code': response.status_code,
-                'headers': dict(response.headers),
-                'body': response.text[:1000],  # Limit response size
-                'message': 'Request completed successfully'
-            })
-        except requests.exceptions.ProxyError as e:
-            return jsonify({
-                'success': False,
-                'error': f'Proxy connection failed: {str(e)}'
-            }), 502
-        except requests.exceptions.Timeout as e:
-            return jsonify({
-                'success': False,
-                'error': f'Request timeout: {str(e)}'
-            }), 504
-        except requests.exceptions.RequestException as e:
-            return jsonify({
-                'success': False,
-                'error': f'Request failed: {str(e)}'
-            }), 500
-    
-    except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': f'Server error: {str(e)}'
-        }), 500
+    # Disabled to prevent memory issues in production
+    return jsonify({
+        'success': False,
+        'error': 'Proxy requests disabled to prevent memory issues. Use local proxy server instead.',
+        'message': 'For proxy functionality, run proxy_server.py locally'
+    }), 503
 
 @app.route('/api/proxy-info')
 @login_required

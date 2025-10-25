@@ -6,12 +6,14 @@ import os
 bind = f"0.0.0.0:{os.environ.get('PORT', '8080')}"
 backlog = 2048
 
-# Worker processes - REDUCED for memory constraints
-workers = 2  # Only 2 workers to save memory
+# Worker processes - MINIMAL for memory constraints
+workers = int(os.environ.get('GUNICORN_WORKERS', '1'))  # Use environment variable
 worker_class = 'sync'
 worker_connections = 1000
-timeout = 10
+timeout = 30  # Increased timeout
 keepalive = 2
+max_requests = 1000  # Restart workers after 1000 requests
+max_requests_jitter = 50  # Add some randomness
 
 # Logging
 accesslog = '-'
