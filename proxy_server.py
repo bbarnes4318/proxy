@@ -51,7 +51,7 @@ def handle_client(client_socket):
         url = parts[1]
         version = parts[2]
         
-        # Handle CONNECT method (HTTPS)
+        # Handle CONNECT method (HTTPS) - TUNNEL THROUGH IPROYAL
         if method == "CONNECT":
             handle_https_connect(client_socket, url)
         else:
@@ -63,37 +63,74 @@ def handle_client(client_socket):
         client_socket.close()
 
 def handle_https_connect(client_socket, url):
-    """Handle HTTPS CONNECT requests"""
+    """Handle HTTPS CONNECT requests - TUNNEL THROUGH IPROYAL"""
     try:
         # Extract host and port from CONNECT request
         host_port = url.split(':')
         host = host_port[0]
         port = int(host_port[1]) if len(host_port) > 1 else 443
         
-        # Create connection to IPRoyal proxy
-        proxy_url = f"http://{PROXY_USER}:{PROXY_PASS}@{PROXY_HOST}:{PROXY_PORT}"
-        proxies = {'http': proxy_url, 'https': proxy_url}
+        print(f"Tunneling HTTPS to {host}:{port} through IPRoyal proxy...")
         
-        # Make request through IPRoyal proxy
-        response = requests.get(f"https://{host}:{port}", 
-                              proxies=proxies, 
-                              timeout=10,
-                              stream=True)
+        # Create socket connection to IPRoyal proxy
+        proxy_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        proxy_socket.connect((PROXY_HOST, PROXY_PORT))
         
-        # Send 200 Connection established
-        client_socket.send(b"HTTP/1.1 200 Connection established\r\n\r\n")
+        # Send CONNECT request to IPRoyal proxy
+        connect_request = f"CONNECT {host}:{port} HTTP/1.1\r\n"
+        connect_request += f"Host: {host}:{port}\r\n"
+        connect_request += f"Proxy-Connection: keep-alive\r\n"
+        connect_request += f"Proxy-Authorization: Basic {base64.b64encode(f'{PROXY_USER}:{PROXY_PASS}'.encode()).decode()}\r\n"
+        connect_request += "\r\n"
         
-        # Tunnel the data
-        for chunk in response.iter_content(chunk_size=8192):
-            if chunk:
-                client_socket.send(chunk)
+        proxy_socket.send(connect_request.encode())
+        
+        # Read response from IPRoyal proxy
+        response = proxy_socket.recv(4096).decode()
+        print(f"IPRoyal proxy response: {response[:100]}...")
+        
+        if "200" in response:
+            # Send 200 Connection established to client
+            client_socket.send(b"HTTP/1.1 200 Connection established\r\n\r\n")
+            
+            # Start tunneling data between client and IPRoyal proxy
+            def tunnel_data(source, destination):
+                try:
+                    while True:
+                        data = source.recv(4096)
+                        if not data:
+                            break
+                        destination.send(data)
+                except:
+                    pass
+                finally:
+                    source.close()
+                    destination.close()
+            
+            # Start tunneling in both directions
+            client_to_proxy = threading.Thread(target=tunnel_data, args=(client_socket, proxy_socket))
+            proxy_to_client = threading.Thread(target=tunnel_data, args=(proxy_socket, client_socket))
+            
+            client_to_proxy.daemon = True
+            proxy_to_client.daemon = True
+            
+            client_to_proxy.start()
+            proxy_to_client.start()
+            
+            # Wait for one thread to finish
+            client_to_proxy.join()
+            proxy_to_client.join()
+        else:
+            # Send error to client
+            client_socket.send(b"HTTP/1.1 502 Bad Gateway\r\n\r\n")
+            proxy_socket.close()
                 
     except Exception as e:
         print(f"HTTPS CONNECT error: {e}")
         client_socket.send(b"HTTP/1.1 500 Connection failed\r\n\r\n")
 
 def handle_http_request(client_socket, request):
-    """Handle HTTP requests"""
+    """Handle HTTP requests through IPRoyal proxy"""
     try:
         # Extract URL from request
         lines = request.split('\n')
@@ -117,6 +154,8 @@ def handle_http_request(client_socket, request):
                 return
                 
             full_url = f"http://{host}{url}"
+        
+        print(f"Making HTTP request to {full_url} through IPRoyal proxy...")
         
         # Create proxy connection
         proxy_url = f"http://{PROXY_USER}:{PROXY_PASS}@{PROXY_HOST}:{PROXY_PORT}"

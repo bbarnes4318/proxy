@@ -80,7 +80,7 @@ def test_proxy_connection():
         proxy_url = f"http://{PROXY_USER}:{PROXY_PASS}@{PROXY_HOST}:{PROXY_PORT}"
         proxies = {'http': proxy_url, 'https': proxy_url}
         
-        response_proxy = requests.get('https://ipv4.icanhazip.com', proxies=proxies, timeout=10)
+        response_proxy = requests.get('https://ipv4.icanhazip.com', proxies=proxies, timeout=15)
         proxy_ip = response_proxy.text.strip()
         
         print(f"🌐 Real IP: {real_ip}")
@@ -91,10 +91,12 @@ def test_proxy_connection():
             return True
         else:
             print("❌ Proxy not working - IPs are the same")
+            print("🔧 Make sure your browser is configured to use 127.0.0.1:8888")
             return False
             
     except Exception as e:
         print(f"❌ Test failed: {e}")
+        print("🔧 Check your IPRoyal credentials and connection")
         return False
 
 def main():
