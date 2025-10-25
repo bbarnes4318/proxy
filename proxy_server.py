@@ -8,11 +8,11 @@ import base64
 import re
 from urllib.parse import urlparse
 
-# IPRoyal proxy configuration
+# IPRoyal residential proxy configuration
 PROXY_HOST = "geo.iproyal.com"
 PROXY_PORT = 12321
 PROXY_USER = "TmwjTsVQHgTiXElI"
-PROXY_PASS = "hcu5CmUJHFJqSRFY_country-us"
+PROXY_PASS = "Topproducer2026_country-us_city-lasvegas_session-QNpU9Vlz_lifetime-168h"
 
 # Local proxy server configuration
 LOCAL_PROXY_HOST = "127.0.0.1"

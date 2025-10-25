@@ -13,14 +13,16 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production-12345')
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
 
-# Proxy configuration from things.txt
+# Proxy configuration for IPRoyal residential proxies
 PROXY_CONFIG = {
     'host': 'geo.iproyal.com',
     'port': 12321,
     'username': 'TmwjTsVQHgTiXElI',
-    'password': 'hcu5CmUJHFJqSRFY_country-us',
+    'password': 'Topproducer2026_country-us_city-lasvegas_session-QNpU9Vlz_lifetime-168h',
     'country': 'United States',
-    'rotation': 'Randomize IP'
+    'city': 'Las Vegas',
+    'rotation': 'Sticky IP',
+    'ttl': '7 Day'
 }
 
 # User database (in production, use a real database)

@@ -9,11 +9,11 @@ import time
 import requests
 from threading import Thread
 
-# IPRoyal proxy configuration
+# IPRoyal residential proxy configuration
 PROXY_HOST = "geo.iproyal.com"
 PROXY_PORT = 12321
 PROXY_USER = "TmwjTsVQHgTiXElI"
-PROXY_PASS = "hcu5CmUJHFJqSRFY_country-us"
+PROXY_PASS = "Topproducer2026_country-us_city-lasvegas_session-QNpU9Vlz_lifetime-168h"
 
 def check_admin():
     """Check if running as administrator"""

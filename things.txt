@@ -1,0 +1,53 @@
+Proxy access
+
+Country/Region
+United States
+
+City/State
+Las Vegas
+
+Rotation
+Sticky IP
+
+TTL
+7 Day
+
+Proxy hostname
+geo.iproyal.com
+
+Proxy port
+12321
+
+Proxy username
+TmwjTsVQHgTiXElI
+
+Proxy password
+Topproducer2026_country-us_city-lasvegas_session-QNpU9Vlz_lifetime-168h
+
+
+API Integration Examples
+
+import requests
+
+url = 'https://ipv4.icanhazip.com'
+proxy = 'geo.iproyal.com:12321'
+proxy_auth = 'TmwjTsVQHgTiXElI:Topproducer2026_country-us_city-lasvegas_session-QNpU9Vlz_lifetime-168h'
+proxies = {
+   'http': f'http://{proxy_auth}@{proxy}',
+   'https': f'http://{proxy_auth}@{proxy}'
+}
+
+response = requests.get(url, proxies=proxies)
+print(response.text)
+
+Formatted proxy list
+geo.iproyal.com:12321:TmwjTsVQHgTiXElI:Topproducer2026_country-us_city-lasvegas_session-QNpU9Vlz_lifetime-168h
+geo.iproyal.com:12321:TmwjTsVQHgTiXElI:Topproducer2026_country-us_city-lasvegas_session-l3mrrhbw_lifetime-168h
+geo.iproyal.com:12321:TmwjTsVQHgTiXElI:Topproducer2026_country-us_city-lasvegas_session-QgO2GWwW_lifetime-168h
+geo.iproyal.com:12321:TmwjTsVQHgTiXElI:Topproducer2026_country-us_city-lasvegas_session-WJ4T5ozj_lifetime-168h
+geo.iproyal.com:12321:TmwjTsVQHgTiXElI:Topproducer2026_country-us_city-lasvegas_session-RYPIEOtQ_lifetime-168h
+geo.iproyal.com:12321:TmwjTsVQHgTiXElI:Topproducer2026_country-us_city-lasvegas_session-iiTPdL1s_lifetime-168h
+geo.iproyal.com:12321:TmwjTsVQHgTiXElI:Topproducer2026_country-us_city-lasvegas_session-lVLHkEFU_lifetime-168h
+geo.iproyal.com:12321:TmwjTsVQHgTiXElI:Topproducer2026_country-us_city-lasvegas_session-0zyulnSN_lifetime-168h
+geo.iproyal.com:12321:TmwjTsVQHgTiXElI:Topproducer2026_country-us_city-lasvegas_session-LlddRrvf_lifetime-168h
+geo.iproyal.com:12321:TmwjTsVQHgTiXElI:Topproducer2026_country-us_city-lasvegas_session-nfi0QWPS_lifetime-168h
