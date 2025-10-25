@@ -14,11 +14,12 @@ app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-producti
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)
 
 # Proxy configuration for IPRoyal residential proxies
+# Use environment variables for production deployment
 PROXY_CONFIG = {
-    'host': 'geo.iproyal.com',
-    'port': 12321,
-    'username': 'TmwjTsVQHgTiXElI',
-    'password': 'Topproducer2026_country-us_city-lasvegas_session-QNpU9Vlz_lifetime-168h',
+    'host': os.environ.get('PROXY_HOST', 'geo.iproyal.com'),
+    'port': int(os.environ.get('PROXY_PORT', '12321')),
+    'username': os.environ.get('PROXY_USERNAME', 'TmwjTsVQHgTiXElI'),
+    'password': os.environ.get('PROXY_PASSWORD', 'Topproducer2026_country-us_city-lasvegas_session-QNpU9Vlz_lifetime-168h'),
     'country': 'United States',
     'city': 'Las Vegas',
     'rotation': 'Sticky IP',

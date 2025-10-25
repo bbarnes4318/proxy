@@ -23,6 +23,14 @@ services:
         value: production
       - key: PYTHONUNBUFFERED
         value: "1"
+      - key: PROXY_HOST
+        value: "geo.iproyal.com"
+      - key: PROXY_PORT
+        value: "12321"
+      - key: PROXY_USERNAME
+        value: "TmwjTsVQHgTiXElI"
+      - key: PROXY_PASSWORD
+        value: "Topproducer2026_country-us_city-lasvegas_session-QNpU9Vlz_lifetime-168h"
     
     instance_count: 1
     instance_size_slug: basic-xxs
